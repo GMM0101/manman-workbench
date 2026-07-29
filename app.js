@@ -1662,15 +1662,17 @@ const CLOUD_KEY="wb_cloud";
 function cloudCfg(){ try{ return JSON.parse(localStorage.getItem(CLOUD_KEY))||{}; }catch(e){ return {}; } }
 function cloudEnabled(){ const c=cloudCfg(); return !!(c.enabled && c.owner && c.repo && c.token); }
 function cloudSave(){
+  const ownerEl=document.getElementById("cloudOwner");
+  if(!ownerEl) return; // 设置表单未渲染时跳过，避免 null.value 崩溃
   const c=Object.assign(cloudCfg(),{
-    enabled: $("#cloudOn") ? $("#cloudOn").checked : false,
-    owner: ($("#cloudOwner").value||"").trim(),
-    repo: ($("#cloudRepo").value||"").trim(),
-    token: ($("#cloudToken").value||"").trim(),
-    file: ($("#cloudFile").value||"data.json").trim() || "data.json"
+    enabled: document.getElementById("cloudOn") ? document.getElementById("cloudOn").checked : false,
+    owner: (ownerEl.value||"").trim(),
+    repo: (document.getElementById("cloudRepo").value||"").trim(),
+    token: (document.getElementById("cloudToken").value||"").trim(),
+    file: (document.getElementById("cloudFile").value||"data.json").trim() || "data.json"
   });
   localStorage.setItem(CLOUD_KEY, JSON.stringify(c));
-  const s=$("#cloudStatus"); if(s) s.innerHTML='<span class="muted f11">已保存配置</span>';
+  const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span class="muted f11">已保存配置</span>';
 }
 function ghReq(method, body){
   const c=cloudCfg();
