@@ -1312,13 +1312,6 @@ function addFundRecord(){
   save(); go("fund","overview");
 }
 function delFundRecord(id){ state.fundPlan.records=state.fundPlan.records.filter(r=>r.id!==id); save(); go("fund","overview"); }
-function addFundRecord(){
-  const cat=$("frCat").value, item=$("frItem").value.trim(), amt=parseFloat($("frAmt").value)||0, date=$("frDate").value||today();
-  if(!amt){ alert("请填写金额"); return; }
-  state.fundPlan.records.push({id:uid(), date, cat, item, amount:amt});
-  save(); go("fund","record");
-}
-function delFundRecord(id){ state.fundPlan.records=state.fundPlan.records.filter(r=>r.id!==id); save(); go("fund","record"); }
 
 function fpFunds(){
   const funds=state.fundPlan.funds;
