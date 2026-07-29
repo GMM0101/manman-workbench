@@ -1697,6 +1697,22 @@ function ghPush(){
 function cloudTest(){ if(!cloudEnabled()){ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">请先填 owner/repo/token</span>'; return; } ghReq("GET").then(()=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:var(--mint-d)">✓ 连接成功</span>'; }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
 function cloudSyncNow(){ if(!cloudEnabled()){ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
 let _pushTimer=null;
+let _autoTimer=null;
+function ghPullQuiet(){
+  if(!cloudEnabled()) return Promise.resolve();
+  return ghReq("GET").then(j=>{
+    const txt=decodeURIComponent(escape(atob(j.content.replace(/\s/g,""))));
+    const data=JSON.parse(txt);
+    let changed=false;
+    for(const k in DEFAULT_STATE){ if(data[k]!==undefined && JSON.stringify(data[k])!==JSON.stringify(state[k])){ state[k]=data[k]; changed=true; } }
+    const c=cloudCfg(); c.sha=j.sha; c.lastSync=new Date().toLocaleTimeString('zh-CN'); localStorage.setItem(CLOUD_KEY, JSON.stringify(c));
+    localStorage.setItem("wb_state", JSON.stringify(state));
+    if(changed) go(current.view||"home", current.sub||"");
+    return j;
+  });
+}
+function startAutoSync(){ if(_autoTimer) return; _autoTimer=setInterval(()=>{ ghPullQuiet().catch(()=>{}); }, 30000); }
+
 function cloudAutoPush(){ if(!cloudEnabled()) return; clearTimeout(_pushTimer); _pushTimer=setTimeout(()=>{ ghPush().catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ 自动同步失败</span>'; }); }, 2500); }
 
 function saveAI(){ state.ai={base:$("aiBase").value, model:$("aiModel").value, key:$("aiKey").value}; save(); alert("已保存"); }
@@ -1906,6 +1922,7 @@ function showInstallHelp(){
 /* ===================== 初始化 ===================== */
 function boot(){
   tickTop(); setInterval(tickTop, 30000);
+  startAutoSync();
   setupInstall();
   initAI();
   try {
