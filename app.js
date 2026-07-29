@@ -1682,7 +1682,7 @@ function ghPull(){
     const c=cloudCfg(); c.sha=j.sha; c.lastSync=new Date().toLocaleTimeString('zh-CN');
     localStorage.setItem(CLOUD_KEY, JSON.stringify(c));
     save();
-    const s=$("#cloudStatus"); if(s) s.innerHTML='<span style="color:var(--mint-d)">✓ 已拉取 '+c.lastSync+'</span>';
+    const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:var(--mint-d)">✓ 已拉取 '+c.lastSync+'</span>';
     return j;
   });
 }
@@ -1690,14 +1690,16 @@ function ghPush(){
   if(!cloudEnabled()) return Promise.resolve();
   const content=btoa(unescape(encodeURIComponent(JSON.stringify(state))));
   const c=cloudCfg();
-  const doPut=(sha)=>{ const body={message:"sync "+new Date().toLocaleString('zh-CN'), content}; if(sha) body.sha=sha; return ghReq("PUT", body).then(j=>{ const cc=cloudCfg(); cc.sha=j.sha; cc.lastSync=new Date().toLocaleTimeString('zh-CN'); localStorage.setItem(CLOUD_KEY, JSON.stringify(cc)); const s=$("#cloudStatus"); if(s) s.innerHTML='<span style="color:var(--mint-d)">✓ 已同步 '+cc.lastSync+'</span>'; return j; }); };
+  const doPut=(sha)=>{ const body={message:"sync "+new Date().toLocaleString('zh-CN'), content}; if(sha) body.sha=sha; return ghReq("PUT", body).then(j=>{ const cc=cloudCfg(); cc.sha=j.sha; cc.lastSync=new Date().toLocaleTimeString('zh-CN'); localStorage.setItem(CLOUD_KEY, JSON.stringify(cc)); const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:var(--mint-d)">✓ 已同步 '+cc.lastSync+'</span>'; return j; }); };
   if(c.sha) return doPut(c.sha).catch(e=>{ if(String(e).indexOf("409")>=0){ return ghReq("GET").then(j=>doPut(j.sha)); } throw e; });
   return ghReq("GET").then(j=>doPut(j.sha)).catch(e=>{ if(String(e).indexOf("404")>=0) return doPut(null); throw e; });
 }
-function cloudTest(){ if(!cloudEnabled()){ const s=$("#cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">请先填 owner/repo/token</span>'; return; } ghReq("GET").then(()=>{ const s=$("#cloudStatus"); if(s) s.innerHTML='<span style="color:var(--mint-d)">✓ 连接成功</span>'; }).catch(e=>{ const s=$("#cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
-function cloudSyncNow(){ if(!cloudEnabled()){ const s=$("#cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=$("#cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
+function cloudTest(){ if(!cloudEnabled()){ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">请先填 owner/repo/token</span>'; return; } ghReq("GET").then(()=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:var(--mint-d)">✓ 连接成功</span>'; }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
+function cloudSyncNow(){ if(!cloudEnabled()){ const s=; if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
+function cloudSyncNow(){ if(!cloudEnabled()){ const s=; if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
 let _pushTimer=null;
-function cloudAutoPush(){ if(!cloudEnabled()) return; clearTimeout(_pushTimer); _pushTimer=setTimeout(()=>{ ghPush().catch(e=>{ const s=$("#cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ 自动同步失败</span>'; }); }, 2500); }
+function cloudSyncNow(){ if(!cloudEnabled()){ const s=; if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
+function cloudAutoPush(){ if(!cloudEnabled()) return; clearTimeout(_pushTimer); _pushTimer=setTimeout(()=>{ ghPush().catch(e=>{ const s=; if(s) s.innerHTML='<span style="color:#e06">✗ 自动同步失败</span>'; }); }, 2500); }
 
 function saveAI(){ state.ai={base:$("aiBase").value, model:$("aiModel").value, key:$("aiKey").value}; save(); alert("已保存"); }
 function saveExam(){ state.english.target=$("examTarget").value; save(); go("english","overview"); }
