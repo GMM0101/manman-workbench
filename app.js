@@ -1695,11 +1695,9 @@ function ghPush(){
   return ghReq("GET").then(j=>doPut(j.sha)).catch(e=>{ if(String(e).indexOf("404")>=0) return doPut(null); throw e; });
 }
 function cloudTest(){ if(!cloudEnabled()){ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">请先填 owner/repo/token</span>'; return; } ghReq("GET").then(()=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:var(--mint-d)">✓ 连接成功</span>'; }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
-function cloudSyncNow(){ if(!cloudEnabled()){ const s=; if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
-function cloudSyncNow(){ if(!cloudEnabled()){ const s=; if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
+function cloudSyncNow(){ if(!cloudEnabled()){ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
 let _pushTimer=null;
-function cloudSyncNow(){ if(!cloudEnabled()){ const s=; if(s) s.innerHTML='<span style="color:#e06">请先启用并保存配置</span>'; return; } ghPull().then(()=>ghPush()).then(()=>{ go(current.view, current.sub); }).catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ '+e+'</span>'; }); }
-function cloudAutoPush(){ if(!cloudEnabled()) return; clearTimeout(_pushTimer); _pushTimer=setTimeout(()=>{ ghPush().catch(e=>{ const s=; if(s) s.innerHTML='<span style="color:#e06">✗ 自动同步失败</span>'; }); }, 2500); }
+function cloudAutoPush(){ if(!cloudEnabled()) return; clearTimeout(_pushTimer); _pushTimer=setTimeout(()=>{ ghPush().catch(e=>{ const s=document.getElementById("cloudStatus"); if(s) s.innerHTML='<span style="color:#e06">✗ 自动同步失败</span>'; }); }, 2500); }
 
 function saveAI(){ state.ai={base:$("aiBase").value, model:$("aiModel").value, key:$("aiKey").value}; save(); alert("已保存"); }
 function saveExam(){ state.english.target=$("examTarget").value; save(); go("english","overview"); }
